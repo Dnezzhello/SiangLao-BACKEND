@@ -391,16 +391,16 @@ class ASRService:
                 if np.any(np.isnan(audio_data)) or np.any(np.isinf(audio_data)):
                     return False, "Audio file appears corrupted"
             
-            # Silence check
-            max_amplitude = np.max(np.abs(audio_data))
-            if max_amplitude < config.QUALITY_CONFIG["silence_threshold"]:
+            # Silence check - use RMS energy instead of max amplitude
+            rms_energy = np.sqrt(np.mean(audio_data.flatten()**2))
+            if rms_energy < 0.005:  # More lenient threshold for quiet speakers
                 return False, "Audio appears to be silent"
             
-            # Clipping check
-            clipped_samples = np.sum(np.abs(audio_data) > config.QUALITY_CONFIG["clipping_threshold"])
-            clipping_ratio = clipped_samples / len(audio_data.flatten())
-            if clipping_ratio > config.QUALITY_CONFIG["max_clipping_ratio"]:
-                return False, f"Audio is clipped ({clipping_ratio*100:.1f}% of samples)"
+            # Clipping check - only reject severe clipping
+            severely_clipped = np.sum(np.abs(audio_data.flatten()) > 0.995)  # Very high threshold
+            severe_clipping_ratio = severely_clipped / len(audio_data.flatten())
+            if severe_clipping_ratio > 0.15:  # Allow up to 15% severe clipping
+                return False, f"Audio severely clipped ({severe_clipping_ratio*100:.1f}% of samples)"
             
             # Set audio metadata
             audio_input.setAudioMetadata(duration, sample_rate, 1 if len(audio_data.shape) == 1 else audio_data.shape[0])
