@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: sianglao-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    region: oregon
+    branch: master
+    buildCommand: ""
+    startCommand: ""
+    healthCheckPath: /health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: ML_SERVICE_URL
+        value: https://sianglao-ml-service-production.up.railway.app
+    numInstances: 1
+    disk:
+      name: sianglao-backend-disk
+      mountPath: /app/uploads
+      sizeGB: 1

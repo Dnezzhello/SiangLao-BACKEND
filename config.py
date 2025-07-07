@@ -62,9 +62,9 @@ class Config:
     # File Storage Configuration
     # ================================
     STORAGE_CONFIG = {
-        "uploads_dir": "./uploads",
-        "temp_dir": "./temp",
-        "logs_dir": "./logs",
+        "uploads_dir": os.getenv('UPLOADS_DIR', "./uploads"),
+        "temp_dir": os.getenv('TEMP_DIR', "./temp"),
+        "logs_dir": os.getenv('LOGS_DIR', "./logs"),
         "cleanup_after_hours": (1/60),      # Delete files after 1 minute
         "max_concurrent_requests": 50,  # Limit concurrent processing
         "request_id_length": 12         # Length of generated request IDs
@@ -180,6 +180,11 @@ class ProductionConfig(Config):
     """Production-specific configuration"""
     FLASK_DEBUG = False
     
+    ML_SERVICE_CONFIG = {
+        **Config.ML_SERVICE_CONFIG,
+        "base_url": os.getenv('ML_SERVICE_URL', "https://sianglao-ml-service-production.up.railway.app"),
+    }
+    
     ERROR_CONFIG = {
         **Config.ERROR_CONFIG,
         "include_error_details": False,
@@ -193,7 +198,7 @@ class ProductionConfig(Config):
     
     SECURITY_CONFIG = {
         **Config.SECURITY_CONFIG,
-        "allowed_origins": ["https://yourdomain.com"],  # Update for production
+        "allowed_origins": ["*"],  # Allow all origins for production API
     }
 
 
